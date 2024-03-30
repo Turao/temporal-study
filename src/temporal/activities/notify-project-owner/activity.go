@@ -7,8 +7,6 @@ import (
 	"github.com/turao/temporal-study/src/service"
 )
 
-const Name = "notify-project-owner"
-
 type Activity struct {
 	NotificationService service.NotificationService
 }

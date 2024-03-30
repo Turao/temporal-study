@@ -10,7 +10,9 @@ import (
 	projectentity "github.com/turao/temporal-study/src/entity/project"
 	"github.com/turao/temporal-study/src/repository"
 	"github.com/turao/temporal-study/src/temporal"
-	createprojectworkflow "github.com/turao/temporal-study/src/temporal/workflow/create-project"
+
+	"github.com/turao/temporal-study/src/temporal/workflows"
+	createprojectworkflow "github.com/turao/temporal-study/src/temporal/workflows/create-project"
 	temporalclient "go.temporal.io/sdk/client"
 )
 
@@ -40,7 +42,7 @@ func (svc *service) CreateProject(ctx context.Context, req *api.CreateProjectReq
 	execution, err := svc.temporal.ExecuteWorkflow(
 		ctx,
 		options,
-		createprojectworkflow.Name,
+		workflows.WorkflowNameCreateProject,
 		createprojectworkflow.Request{
 			Request: req,
 		},

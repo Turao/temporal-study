@@ -4,9 +4,14 @@ import (
 	"log"
 
 	"github.com/turao/temporal-study/src/service"
-	notifyprojectowneractivity "github.com/turao/temporal-study/src/temporal/activity/notify-project-owner"
-	upsertprojectactivity "github.com/turao/temporal-study/src/temporal/activity/upsert-project"
-	createprojectworkflow "github.com/turao/temporal-study/src/temporal/workflow/create-project"
+
+	"github.com/turao/temporal-study/src/temporal/activities"
+	"github.com/turao/temporal-study/src/temporal/workflows"
+
+	notifyprojectowneractivity "github.com/turao/temporal-study/src/temporal/activities/notify-project-owner"
+	upsertprojectactivity "github.com/turao/temporal-study/src/temporal/activities/upsert-project"
+	createprojectworkflow "github.com/turao/temporal-study/src/temporal/workflows/create-project"
+
 	"go.temporal.io/sdk/activity"
 	temporalclient "go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/worker"
@@ -48,7 +53,7 @@ func (t *temporal) Run() error {
 	w.RegisterWorkflowWithOptions(
 		createProjectWorkflow.Execute,
 		workflow.RegisterOptions{
-			Name: createprojectworkflow.Name,
+			Name: workflows.WorkflowNameCreateProject,
 		},
 	)
 
@@ -58,7 +63,7 @@ func (t *temporal) Run() error {
 	w.RegisterActivityWithOptions(
 		upsertProjectActivity.Execute,
 		activity.RegisterOptions{
-			Name: upsertprojectactivity.Name,
+			Name: activities.ActivityNameUpsertProject,
 		},
 	)
 
@@ -68,7 +73,7 @@ func (t *temporal) Run() error {
 	w.RegisterActivityWithOptions(
 		notifyProjectOwneractivity.Execute,
 		activity.RegisterOptions{
-			Name: notifyprojectowneractivity.Name,
+			Name: activities.ActivityNameNotifyProjectOwner,
 		},
 	)
 

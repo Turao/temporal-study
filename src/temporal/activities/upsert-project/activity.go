@@ -7,8 +7,6 @@ import (
 	"github.com/turao/temporal-study/src/service"
 )
 
-const Name = "upsert-project"
-
 type Activity struct {
 	ProjectService service.ProjectService
 }

@@ -7,12 +7,11 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/turao/temporal-study/src/api"
 	projectentity "github.com/turao/temporal-study/src/entity/project"
-	notifyprojectowneractivity "github.com/turao/temporal-study/src/temporal/activity/notify-project-owner"
-	upsertprojectactivity "github.com/turao/temporal-study/src/temporal/activity/upsert-project"
+	"github.com/turao/temporal-study/src/temporal/activities"
+	notifyprojectowneractivity "github.com/turao/temporal-study/src/temporal/activities/notify-project-owner"
+	upsertprojectactivity "github.com/turao/temporal-study/src/temporal/activities/upsert-project"
 	"go.temporal.io/sdk/workflow"
 )
-
-const Name = "create-project"
 
 type Workflow struct{}
 
@@ -54,7 +53,7 @@ func (w *Workflow) Execute(ctx workflow.Context, req Request) (*Response, error)
 	var upsertProjectActivityResponse *upsertprojectactivity.Response
 	err = workflow.ExecuteActivity(
 		ctx,
-		upsertprojectactivity.Name,
+		activities.ActivityNameUpsertProject,
 		upsertprojectactivity.Request{
 			Request: &api.UpsertProjectRequest{
 				ProjectID: project.ID.String(),
@@ -75,7 +74,7 @@ func (w *Workflow) Execute(ctx workflow.Context, req Request) (*Response, error)
 	var notifyProjectOwnerActivityResponse *notifyprojectowneractivity.Response
 	err = workflow.ExecuteActivity(
 		ctx,
-		notifyprojectowneractivity.Name,
+		activities.ActivityNameNotifyProjectOwner,
 		notifyprojectowneractivity.Request{
 			Request: &api.NotifyRequest{
 				EntityID: project.OwnerID.String(),
