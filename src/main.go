@@ -6,7 +6,11 @@ import (
 
 	"github.com/turao/temporal-study/src/api"
 	projectrepository "github.com/turao/temporal-study/src/repository/project"
-	"github.com/turao/temporal-study/src/service/project"
+	projectservice "github.com/turao/temporal-study/src/service/project"
+
+	notificationrepository "github.com/turao/temporal-study/src/repository/notification"
+	notificationservice "github.com/turao/temporal-study/src/service/notification"
+
 	"github.com/turao/temporal-study/src/temporal"
 	temporalclient "go.temporal.io/sdk/client"
 )
@@ -18,12 +22,24 @@ func main() {
 	}
 	defer client.Close()
 
+	notificationRepository, err := notificationrepository.New()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	notificationService, err := notificationservice.New(notificationservice.Params{
+		NotificationRepository: notificationRepository,
+	})
+	if err != nil {
+		log.Fatalln(err)
+	}
+
 	projectRepository, err := projectrepository.New()
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	projectService, err := project.New(project.Params{
+	projectService, err := projectservice.New(projectservice.Params{
 		Temporal:          client,
 		ProjectRepository: projectRepository,
 	})
@@ -32,8 +48,9 @@ func main() {
 	}
 
 	temporalService, err := temporal.New(temporal.Params{
-		Client:         client,
-		ProjectService: projectService,
+		Client:              client,
+		ProjectService:      projectService,
+		NotificationService: notificationService,
 	})
 	if err != nil {
 		log.Fatalln(err)

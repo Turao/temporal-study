@@ -4,7 +4,12 @@ import (
 	"context"
 
 	"github.com/turao/temporal-study/src/api"
+	"github.com/turao/temporal-study/src/service"
 )
+
+type NotifyProjectOwnerActivity struct {
+	NotificationService service.NotificationService
+}
 
 type NotifyProjectOwnerActivityRequest struct {
 	Request *api.NotifyRequest
@@ -14,9 +19,21 @@ type NotifyProjectOwnerActivityResponse struct {
 	Response *api.NotifyResponse
 }
 
-func NotifyProjectOwnerActivity(
+func (npoa *NotifyProjectOwnerActivity) ExecuteNotifyProjectOwnerActivity(
 	ctx context.Context,
 	req NotifyProjectOwnerActivityRequest,
 ) (*NotifyProjectOwnerActivityResponse, error) {
-	return nil, nil
+	res, err := npoa.NotificationService.Notify(
+		ctx,
+		&api.NotifyRequest{
+			EntityID: req.Request.EntityID,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &NotifyProjectOwnerActivityResponse{
+		Response: res,
+	}, nil
 }

@@ -15,19 +15,22 @@ const (
 )
 
 type Params struct {
-	Client         temporalclient.Client
-	ProjectService service.ProjectService
+	Client              temporalclient.Client
+	ProjectService      service.ProjectService
+	NotificationService service.NotificationService
 }
 
 type temporal struct {
-	client         temporalclient.Client
-	projectService service.ProjectService
+	client              temporalclient.Client
+	projectService      service.ProjectService
+	notificationService service.NotificationService
 }
 
 func New(params Params) (*temporal, error) {
 	return &temporal{
-		client:         params.Client,
-		projectService: params.ProjectService,
+		client:              params.Client,
+		projectService:      params.ProjectService,
+		notificationService: params.NotificationService,
 	}, nil
 }
 
@@ -43,7 +46,9 @@ func (t *temporal) Run() error {
 	w.RegisterActivity(&activities.UpsertProjectActivity{
 		ProjectService: t.projectService,
 	})
-	w.RegisterActivity(activities.NotifyProjectOwnerActivity)
+	w.RegisterActivity(&activities.NotifyProjectOwnerActivity{
+		NotificationService: t.notificationService,
+	})
 
 	err := w.Run(worker.InterruptCh())
 	if err != nil {

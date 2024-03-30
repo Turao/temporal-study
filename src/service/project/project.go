@@ -66,6 +66,8 @@ func (svc *service) DeleteProject(ctx context.Context, req *api.DeleteProjectReq
 }
 
 func (svc *service) UpsertProject(ctx context.Context, req *api.UpsertProjectRequest) (*api.UpsertProjectResponse, error) {
+	log.Println("upserting project", req.ProjectID, req)
+
 	projectID, err := uuid.FromString(req.ProjectID)
 	if err != nil {
 		return nil, err
@@ -90,5 +92,6 @@ func (svc *service) UpsertProject(ctx context.Context, req *api.UpsertProjectReq
 		return nil, err
 	}
 
+	log.Println("project upserted", req.ProjectID, req)
 	return &api.UpsertProjectResponse{}, nil
 }

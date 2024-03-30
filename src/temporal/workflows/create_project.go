@@ -32,6 +32,7 @@ func CreateProjectWorkflow(
 	)
 
 	// create the entity
+	log.Println("creating the project")
 	ownerID, err := uuid.FromString(req.Request.OwnerID)
 	if err != nil {
 		return nil, err
@@ -45,11 +46,12 @@ func CreateProjectWorkflow(
 	}
 
 	// store in the repository
+	log.Println("saving the project")
 	var upsertProjectActivity *activities.UpsertProjectActivity
 	var upsertProjectActivityResponse *activities.UpsertProjectActivityResponse
 	err = workflow.ExecuteActivity(
 		ctx,
-		upsertProjectActivity.Execute,
+		upsertProjectActivity.ExecuteUpsertProjectActivity,
 		activities.UpsertProjectActivityRequest{
 			Request: &api.UpsertProjectRequest{
 				ProjectID: project.ID.String(),
@@ -66,10 +68,12 @@ func CreateProjectWorkflow(
 	}
 
 	// notify the owner
+	log.Println("notifying the project owner")
+	var notifyProjectOwnerActivity *activities.NotifyProjectOwnerActivity
 	var notifyProjectOwnerActivityResponse *activities.NotifyProjectOwnerActivityResponse
 	err = workflow.ExecuteActivity(
 		ctx,
-		activities.NotifyProjectOwnerActivity,
+		notifyProjectOwnerActivity.ExecuteNotifyProjectOwnerActivity,
 		activities.NotifyProjectOwnerActivityRequest{
 			Request: &api.NotifyRequest{
 				EntityID: project.OwnerID.String(),
@@ -84,5 +88,6 @@ func CreateProjectWorkflow(
 		return nil, err
 	}
 
+	log.Println("workflow completed")
 	return nil, nil
 }

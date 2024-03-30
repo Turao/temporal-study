@@ -19,7 +19,7 @@ type UpsertProjectActivityResponse struct {
 	Response *api.UpsertProjectResponse
 }
 
-func (upa *UpsertProjectActivity) Execute(
+func (upa *UpsertProjectActivity) ExecuteUpsertProjectActivity(
 	ctx context.Context,
 	req UpsertProjectActivityRequest,
 ) (*UpsertProjectActivityResponse, error) {
