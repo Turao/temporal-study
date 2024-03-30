@@ -37,7 +37,7 @@ func New(params Params) (*service, error) {
 // CreateProject implements service.ProjectService.
 func (svc *service) CreateProject(ctx context.Context, req *api.CreateProjectRequest) (*api.CreateProjectResponse, error) {
 	options := temporalclient.StartWorkflowOptions{
-		ID:                    fmt.Sprintf("%s_%s", req.OwnerID, req.ProjectName),
+		ID:                    fmt.Sprintf("create-project_%s_%s", req.OwnerID, req.ProjectName),
 		TaskQueue:             workers.TaskQueueDefault,
 		WorkflowIDReusePolicy: enums.WORKFLOW_ID_REUSE_POLICY_REJECT_DUPLICATE,
 	}
