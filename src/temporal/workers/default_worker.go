@@ -1,8 +1,6 @@
-package temporal
+package workers
 
 import (
-	"log"
-
 	"github.com/turao/temporal-study/src/service"
 
 	"github.com/turao/temporal-study/src/temporal/activities"
@@ -19,7 +17,7 @@ import (
 )
 
 const (
-	WorkerTaskQueue = "WorkerTaskQueue"
+	TaskQueueDefault = "default"
 )
 
 type Params struct {
@@ -28,29 +26,19 @@ type Params struct {
 	NotificationService service.NotificationService
 }
 
-type temporal struct {
-	client              temporalclient.Client
-	projectService      service.ProjectService
-	notificationService service.NotificationService
+type defaultWorker struct {
+	delegate worker.Worker
 }
 
-func New(params Params) (*temporal, error) {
-	return &temporal{
-		client:              params.Client,
-		projectService:      params.ProjectService,
-		notificationService: params.NotificationService,
-	}, nil
-}
-
-func (t *temporal) Run() error {
-	w := worker.New(
-		t.client,
-		WorkerTaskQueue,
+func New(params Params) (*defaultWorker, error) {
+	delegate := worker.New(
+		params.Client,
+		TaskQueueDefault,
 		worker.Options{},
 	)
 
 	createProjectWorkflow := &createprojectworkflow.Workflow{}
-	w.RegisterWorkflowWithOptions(
+	delegate.RegisterWorkflowWithOptions(
 		createProjectWorkflow.Execute,
 		workflow.RegisterOptions{
 			Name: workflows.WorkflowNameCreateProject,
@@ -58,9 +46,9 @@ func (t *temporal) Run() error {
 	)
 
 	upsertProjectActivity := &upsertprojectactivity.Activity{
-		ProjectService: t.projectService,
+		ProjectService: params.ProjectService,
 	}
-	w.RegisterActivityWithOptions(
+	delegate.RegisterActivityWithOptions(
 		upsertProjectActivity.Execute,
 		activity.RegisterOptions{
 			Name: activities.ActivityNameUpsertProject,
@@ -68,20 +56,20 @@ func (t *temporal) Run() error {
 	)
 
 	notifyProjectOwneractivity := &notifyprojectowneractivity.Activity{
-		NotificationService: t.notificationService,
+		NotificationService: params.NotificationService,
 	}
-	w.RegisterActivityWithOptions(
+	delegate.RegisterActivityWithOptions(
 		notifyProjectOwneractivity.Execute,
 		activity.RegisterOptions{
 			Name: activities.ActivityNameNotifyProjectOwner,
 		},
 	)
 
-	err := w.Run(worker.InterruptCh())
-	if err != nil {
-		log.Println("unable to start worker", err)
-		return err
-	}
+	return &defaultWorker{
+		delegate: delegate,
+	}, nil
+}
 
-	return nil
+func (dw *defaultWorker) Run() error {
+	return dw.delegate.Run(worker.InterruptCh())
 }

@@ -9,10 +9,11 @@ import (
 	"github.com/turao/temporal-study/src/api"
 	projectentity "github.com/turao/temporal-study/src/entity/project"
 	"github.com/turao/temporal-study/src/repository"
-	"github.com/turao/temporal-study/src/temporal"
+	"github.com/turao/temporal-study/src/temporal/workers"
 
 	"github.com/turao/temporal-study/src/temporal/workflows"
 	createprojectworkflow "github.com/turao/temporal-study/src/temporal/workflows/create-project"
+	"go.temporal.io/api/enums/v1"
 	temporalclient "go.temporal.io/sdk/client"
 )
 
@@ -36,8 +37,9 @@ func New(params Params) (*service, error) {
 // CreateProject implements service.ProjectService.
 func (svc *service) CreateProject(ctx context.Context, req *api.CreateProjectRequest) (*api.CreateProjectResponse, error) {
 	options := temporalclient.StartWorkflowOptions{
-		ID:        fmt.Sprintf("%s_%s", req.OwnerID, req.ProjectName),
-		TaskQueue: temporal.WorkerTaskQueue,
+		ID:                    fmt.Sprintf("%s_%s", req.OwnerID, req.ProjectName),
+		TaskQueue:             workers.TaskQueueDefault,
+		WorkflowIDReusePolicy: enums.WORKFLOW_ID_REUSE_POLICY_REJECT_DUPLICATE,
 	}
 	execution, err := svc.temporal.ExecuteWorkflow(
 		ctx,

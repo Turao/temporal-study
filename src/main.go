@@ -4,14 +4,13 @@ import (
 	"context"
 	"log"
 
+	"github.com/gofrs/uuid"
 	"github.com/turao/temporal-study/src/api"
-	projectrepository "github.com/turao/temporal-study/src/repository/project"
-	projectservice "github.com/turao/temporal-study/src/service/project"
-
 	notificationrepository "github.com/turao/temporal-study/src/repository/notification"
+	projectrepository "github.com/turao/temporal-study/src/repository/project"
 	notificationservice "github.com/turao/temporal-study/src/service/notification"
-
-	"github.com/turao/temporal-study/src/temporal"
+	projectservice "github.com/turao/temporal-study/src/service/project"
+	"github.com/turao/temporal-study/src/temporal/workers"
 	temporalclient "go.temporal.io/sdk/client"
 )
 
@@ -47,7 +46,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	temporalService, err := temporal.New(temporal.Params{
+	temporalService, err := workers.New(workers.Params{
 		Client:              client,
 		ProjectService:      projectService,
 		NotificationService: notificationService,
@@ -67,7 +66,7 @@ func main() {
 		context.Background(),
 		&api.CreateProjectRequest{
 			ProjectName: "my-project",
-			OwnerID:     "178a7ca5-e5cd-4fa7-9d93-5732af1855c9",
+			OwnerID:     uuid.Must(uuid.NewV4()).String(),
 		},
 	)
 	if err != nil {
