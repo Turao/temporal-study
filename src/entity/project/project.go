@@ -37,6 +37,13 @@ func New(opts ...ProjectOption) (*Project, error) {
 
 type ProjectOption func(p *Project) error
 
+func WithID(id uuid.UUID) ProjectOption {
+	return func(p *Project) error {
+		p.ID = id
+		return nil
+	}
+}
+
 func WithName(name string) ProjectOption {
 	return func(p *Project) error {
 		p.Name = name

@@ -5,26 +5,29 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/gofrs/uuid"
 	"github.com/turao/temporal-study/src/api"
-	svc "github.com/turao/temporal-study/src/service"
+	projectentity "github.com/turao/temporal-study/src/entity/project"
+	"github.com/turao/temporal-study/src/repository"
 	"github.com/turao/temporal-study/src/temporal"
 	"github.com/turao/temporal-study/src/temporal/workflows"
 	temporalclient "go.temporal.io/sdk/client"
 )
 
 type Params struct {
-	Temporal temporalclient.Client
+	Temporal          temporalclient.Client
+	ProjectRepository repository.ProjectRepository
 }
 
 type service struct {
-	temporal temporalclient.Client
+	temporal          temporalclient.Client
+	projectRepository repository.ProjectRepository
 }
-
-var _ svc.ProjectService = (*service)(nil)
 
 func New(params Params) (*service, error) {
 	return &service{
-		temporal: params.Temporal,
+		temporal:          params.Temporal,
+		projectRepository: params.ProjectRepository,
 	}, nil
 }
 
@@ -63,5 +66,29 @@ func (svc *service) DeleteProject(ctx context.Context, req *api.DeleteProjectReq
 }
 
 func (svc *service) UpsertProject(ctx context.Context, req *api.UpsertProjectRequest) (*api.UpsertProjectResponse, error) {
-	panic("unimplemented")
+	projectID, err := uuid.FromString(req.ProjectID)
+	if err != nil {
+		return nil, err
+	}
+
+	ownerID, err := uuid.FromString(req.OwnerID)
+	if err != nil {
+		return nil, err
+	}
+
+	project, err := projectentity.New(
+		projectentity.WithID(projectID),
+		projectentity.WithName(req.ProjectName),
+		projectentity.WithOwnerID(ownerID),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	err = svc.projectRepository.SaveProject(ctx, project)
+	if err != nil {
+		return nil, err
+	}
+
+	return &api.UpsertProjectResponse{}, nil
 }

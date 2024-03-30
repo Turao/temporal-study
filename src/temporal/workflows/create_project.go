@@ -45,10 +45,11 @@ func CreateProjectWorkflow(
 	}
 
 	// store in the repository
+	var upsertProjectActivity *activities.UpsertProjectActivity
 	var upsertProjectActivityResponse *activities.UpsertProjectActivityResponse
 	err = workflow.ExecuteActivity(
 		ctx,
-		activities.UpsertProjectActivity,
+		upsertProjectActivity.Execute,
 		activities.UpsertProjectActivityRequest{
 			Request: &api.UpsertProjectRequest{
 				ProjectID: project.ID.String(),
@@ -57,7 +58,7 @@ func CreateProjectWorkflow(
 		},
 	).Get(
 		ctx,
-		upsertProjectActivityResponse,
+		&upsertProjectActivityResponse,
 	)
 	if err != nil {
 		log.Println("unable to upsert project", err)
@@ -76,7 +77,7 @@ func CreateProjectWorkflow(
 		},
 	).Get(
 		ctx,
-		notifyProjectOwnerActivityResponse,
+		&notifyProjectOwnerActivityResponse,
 	)
 	if err != nil {
 		log.Println("unable to notify project owner", err)

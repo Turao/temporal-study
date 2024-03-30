@@ -3,6 +3,7 @@ package temporal
 import (
 	"log"
 
+	"github.com/turao/temporal-study/src/service"
 	"github.com/turao/temporal-study/src/temporal/activities"
 	"github.com/turao/temporal-study/src/temporal/workflows"
 	temporalclient "go.temporal.io/sdk/client"
@@ -14,28 +15,34 @@ const (
 )
 
 type Params struct {
-	Temporal temporalclient.Client
+	Client         temporalclient.Client
+	ProjectService service.ProjectService
 }
 
-type service struct {
-	temporal temporalclient.Client
+type temporal struct {
+	client         temporalclient.Client
+	projectService service.ProjectService
 }
 
-func New(params Params) (*service, error) {
-	return &service{
-		temporal: params.Temporal,
+func New(params Params) (*temporal, error) {
+	return &temporal{
+		client:         params.Client,
+		projectService: params.ProjectService,
 	}, nil
 }
 
-func (svc *service) Run() error {
+func (t *temporal) Run() error {
 	w := worker.New(
-		svc.temporal,
+		t.client,
 		WorkerTaskQueue,
 		worker.Options{},
 	)
 
 	w.RegisterWorkflow(workflows.CreateProjectWorkflow)
-	w.RegisterActivity(activities.UpsertProjectActivity)
+
+	w.RegisterActivity(&activities.UpsertProjectActivity{
+		ProjectService: t.projectService,
+	})
 	w.RegisterActivity(activities.NotifyProjectOwnerActivity)
 
 	err := w.Run(worker.InterruptCh())

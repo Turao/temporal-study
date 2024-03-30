@@ -4,7 +4,12 @@ import (
 	"context"
 
 	"github.com/turao/temporal-study/src/api"
+	"github.com/turao/temporal-study/src/service"
 )
+
+type UpsertProjectActivity struct {
+	ProjectService service.ProjectService
+}
 
 type UpsertProjectActivityRequest struct {
 	Request *api.UpsertProjectRequest
@@ -14,9 +19,16 @@ type UpsertProjectActivityResponse struct {
 	Response *api.UpsertProjectResponse
 }
 
-func UpsertProjectActivity(
+func (upa *UpsertProjectActivity) Execute(
 	ctx context.Context,
-	req *UpsertProjectActivityRequest,
+	req UpsertProjectActivityRequest,
 ) (*UpsertProjectActivityResponse, error) {
-	return nil, nil
+	res, err := upa.ProjectService.UpsertProject(ctx, req.Request)
+	if err != nil {
+		return nil, err
+	}
+
+	return &UpsertProjectActivityResponse{
+		Response: res,
+	}, nil
 }
