@@ -46,21 +46,24 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	temporalService, err := workers.New(workers.Params{
-		Client:              client,
-		ProjectService:      projectService,
-		NotificationService: notificationService,
-	})
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	go func() {
-		err := temporalService.Run()
+	numberOfWorkers := 3
+	for i := 0; i < numberOfWorkers; i++ {
+		defaultWorker, err := workers.New(workers.Params{
+			Client:              client,
+			ProjectService:      projectService,
+			NotificationService: notificationService,
+		})
 		if err != nil {
 			log.Fatalln(err)
 		}
-	}()
+
+		go func() {
+			err := defaultWorker.Run()
+			if err != nil {
+				log.Fatalln(err)
+			}
+		}()
+	}
 
 	res, err := projectService.CreateProject(
 		context.Background(),
