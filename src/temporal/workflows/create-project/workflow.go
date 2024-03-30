@@ -10,18 +10,18 @@ import (
 	"github.com/turao/temporal-study/src/temporal/activities"
 	notifyprojectowneractivity "github.com/turao/temporal-study/src/temporal/activities/notify-project-owner"
 	upsertprojectactivity "github.com/turao/temporal-study/src/temporal/activities/upsert-project"
+	"go.temporal.io/sdk/temporal"
 	"go.temporal.io/sdk/workflow"
 )
 
 type Workflow struct{}
 
 type Request struct {
-	Request *api.CreateProjectRequest
+	ProjectName string
+	OwnerID     string
 }
 
-type Response struct {
-	Response *api.CreateProjectResponse
-}
+type Response struct{}
 
 func (w *Workflow) Execute(ctx workflow.Context, req Request) (*Response, error) {
 	log.Println("starting create project workflow", req)
@@ -31,17 +31,20 @@ func (w *Workflow) Execute(ctx workflow.Context, req Request) (*Response, error)
 		ctx,
 		workflow.ActivityOptions{
 			StartToCloseTimeout: time.Minute,
+			RetryPolicy: &temporal.RetryPolicy{
+				MaximumAttempts: 3,
+			},
 		},
 	)
 
 	// create the entity
 	log.Println("creating the project")
-	ownerID, err := uuid.FromString(req.Request.OwnerID)
+	ownerID, err := uuid.FromString(req.OwnerID)
 	if err != nil {
 		return nil, err
 	}
 	project, err := projectentity.New(
-		projectentity.WithName(req.Request.ProjectName),
+		projectentity.WithName(req.ProjectName),
 		projectentity.WithOwnerID(ownerID),
 	)
 	if err != nil {
@@ -90,5 +93,5 @@ func (w *Workflow) Execute(ctx workflow.Context, req Request) (*Response, error)
 	}
 
 	log.Println("workflow completed")
-	return nil, nil
+	return &Response{}, nil
 }

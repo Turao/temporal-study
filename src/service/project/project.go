@@ -44,7 +44,8 @@ func (svc *service) CreateProject(ctx context.Context, req *api.CreateProjectReq
 		options,
 		workflows.WorkflowNameCreateProject,
 		createprojectworkflow.Request{
-			Request: req,
+			ProjectName: req.ProjectName,
+			OwnerID:     req.OwnerID,
 		},
 	)
 	if err != nil {
@@ -59,7 +60,7 @@ func (svc *service) CreateProject(ctx context.Context, req *api.CreateProjectReq
 		return nil, err
 	}
 
-	return createProjectWorkflowResponse.Response, nil
+	return &api.CreateProjectResponse{}, nil
 }
 
 // DeleteProject implements service.ProjectService.

@@ -46,5 +46,7 @@ func (svc *service) Notify(ctx context.Context, req *api.NotifyRequest) (*api.No
 	}
 
 	log.Println("entity notified", req.EntityID, req)
-	return &api.NotifyResponse{}, nil
+	return &api.NotifyResponse{
+		NotificationID: notification.ID.String(),
+	}, nil
 }
