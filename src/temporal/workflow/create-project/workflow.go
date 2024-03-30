@@ -7,22 +7,26 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/turao/temporal-study/src/api"
 	projectentity "github.com/turao/temporal-study/src/entity/project"
-	"github.com/turao/temporal-study/src/temporal/activities"
+	notifyprojectowneractivity "github.com/turao/temporal-study/src/temporal/activity/notify-project-owner"
+	upsertprojectactivity "github.com/turao/temporal-study/src/temporal/activity/upsert-project"
 	"go.temporal.io/sdk/workflow"
 )
 
-type CreateProjectWorkflowRequest struct {
+const Name = "create-project"
+
+type Workflow struct{}
+
+type Request struct {
 	Request *api.CreateProjectRequest
 }
 
-type CreateProjectWorkflowResponse struct {
+type Response struct {
 	Response *api.CreateProjectResponse
 }
 
-func CreateProjectWorkflow(
-	ctx workflow.Context,
-	req CreateProjectWorkflowRequest,
-) (*CreateProjectWorkflowResponse, error) {
+func (w *Workflow) Execute(ctx workflow.Context, req Request) (*Response, error) {
+	log.Println("starting create project workflow", req)
+
 	// apply activity options
 	ctx = workflow.WithActivityOptions(
 		ctx,
@@ -47,12 +51,11 @@ func CreateProjectWorkflow(
 
 	// store in the repository
 	log.Println("saving the project")
-	var upsertProjectActivity *activities.UpsertProjectActivity
-	var upsertProjectActivityResponse *activities.UpsertProjectActivityResponse
+	var upsertProjectActivityResponse *upsertprojectactivity.Response
 	err = workflow.ExecuteActivity(
 		ctx,
-		upsertProjectActivity.ExecuteUpsertProjectActivity,
-		activities.UpsertProjectActivityRequest{
+		upsertprojectactivity.Name,
+		upsertprojectactivity.Request{
 			Request: &api.UpsertProjectRequest{
 				ProjectID: project.ID.String(),
 				OwnerID:   project.OwnerID.String(),
@@ -69,12 +72,11 @@ func CreateProjectWorkflow(
 
 	// notify the owner
 	log.Println("notifying the project owner")
-	var notifyProjectOwnerActivity *activities.NotifyProjectOwnerActivity
-	var notifyProjectOwnerActivityResponse *activities.NotifyProjectOwnerActivityResponse
+	var notifyProjectOwnerActivityResponse *notifyprojectowneractivity.Response
 	err = workflow.ExecuteActivity(
 		ctx,
-		notifyProjectOwnerActivity.ExecuteNotifyProjectOwnerActivity,
-		activities.NotifyProjectOwnerActivityRequest{
+		notifyprojectowneractivity.Name,
+		notifyprojectowneractivity.Request{
 			Request: &api.NotifyRequest{
 				EntityID: project.OwnerID.String(),
 			},

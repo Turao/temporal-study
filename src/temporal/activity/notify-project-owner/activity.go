@@ -1,4 +1,4 @@
-package activities
+package notifyprojectowner
 
 import (
 	"context"
@@ -7,22 +7,21 @@ import (
 	"github.com/turao/temporal-study/src/service"
 )
 
-type NotifyProjectOwnerActivity struct {
+const Name = "notify-project-owner"
+
+type Activity struct {
 	NotificationService service.NotificationService
 }
 
-type NotifyProjectOwnerActivityRequest struct {
+type Request struct {
 	Request *api.NotifyRequest
 }
 
-type NotifyProjectOwnerActivityResponse struct {
+type Response struct {
 	Response *api.NotifyResponse
 }
 
-func (npoa *NotifyProjectOwnerActivity) ExecuteNotifyProjectOwnerActivity(
-	ctx context.Context,
-	req NotifyProjectOwnerActivityRequest,
-) (*NotifyProjectOwnerActivityResponse, error) {
+func (npoa *Activity) Execute(ctx context.Context, req Request) (*Response, error) {
 	res, err := npoa.NotificationService.Notify(
 		ctx,
 		&api.NotifyRequest{
@@ -33,7 +32,7 @@ func (npoa *NotifyProjectOwnerActivity) ExecuteNotifyProjectOwnerActivity(
 		return nil, err
 	}
 
-	return &NotifyProjectOwnerActivityResponse{
+	return &Response{
 		Response: res,
 	}, nil
 }

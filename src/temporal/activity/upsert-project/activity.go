@@ -1,4 +1,4 @@
-package activities
+package upsertproject
 
 import (
 	"context"
@@ -7,28 +7,27 @@ import (
 	"github.com/turao/temporal-study/src/service"
 )
 
-type UpsertProjectActivity struct {
+const Name = "upsert-project"
+
+type Activity struct {
 	ProjectService service.ProjectService
 }
 
-type UpsertProjectActivityRequest struct {
+type Request struct {
 	Request *api.UpsertProjectRequest
 }
 
-type UpsertProjectActivityResponse struct {
+type Response struct {
 	Response *api.UpsertProjectResponse
 }
 
-func (upa *UpsertProjectActivity) ExecuteUpsertProjectActivity(
-	ctx context.Context,
-	req UpsertProjectActivityRequest,
-) (*UpsertProjectActivityResponse, error) {
+func (upa *Activity) Execute(ctx context.Context, req Request) (*Response, error) {
 	res, err := upa.ProjectService.UpsertProject(ctx, req.Request)
 	if err != nil {
 		return nil, err
 	}
 
-	return &UpsertProjectActivityResponse{
+	return &Response{
 		Response: res,
 	}, nil
 }

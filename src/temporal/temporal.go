@@ -4,10 +4,13 @@ import (
 	"log"
 
 	"github.com/turao/temporal-study/src/service"
-	"github.com/turao/temporal-study/src/temporal/activities"
-	"github.com/turao/temporal-study/src/temporal/workflows"
+	notifyprojectowneractivity "github.com/turao/temporal-study/src/temporal/activity/notify-project-owner"
+	upsertprojectactivity "github.com/turao/temporal-study/src/temporal/activity/upsert-project"
+	createprojectworkflow "github.com/turao/temporal-study/src/temporal/workflow/create-project"
+	"go.temporal.io/sdk/activity"
 	temporalclient "go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/worker"
+	"go.temporal.io/sdk/workflow"
 )
 
 const (
@@ -41,14 +44,33 @@ func (t *temporal) Run() error {
 		worker.Options{},
 	)
 
-	w.RegisterWorkflow(workflows.CreateProjectWorkflow)
+	createProjectWorkflow := &createprojectworkflow.Workflow{}
+	w.RegisterWorkflowWithOptions(
+		createProjectWorkflow.Execute,
+		workflow.RegisterOptions{
+			Name: createprojectworkflow.Name,
+		},
+	)
 
-	w.RegisterActivity(&activities.UpsertProjectActivity{
+	upsertProjectActivity := &upsertprojectactivity.Activity{
 		ProjectService: t.projectService,
-	})
-	w.RegisterActivity(&activities.NotifyProjectOwnerActivity{
+	}
+	w.RegisterActivityWithOptions(
+		upsertProjectActivity.Execute,
+		activity.RegisterOptions{
+			Name: upsertprojectactivity.Name,
+		},
+	)
+
+	notifyProjectOwneractivity := &notifyprojectowneractivity.Activity{
 		NotificationService: t.notificationService,
-	})
+	}
+	w.RegisterActivityWithOptions(
+		notifyProjectOwneractivity.Execute,
+		activity.RegisterOptions{
+			Name: notifyprojectowneractivity.Name,
+		},
+	)
 
 	err := w.Run(worker.InterruptCh())
 	if err != nil {

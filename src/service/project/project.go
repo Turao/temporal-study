@@ -10,7 +10,7 @@ import (
 	projectentity "github.com/turao/temporal-study/src/entity/project"
 	"github.com/turao/temporal-study/src/repository"
 	"github.com/turao/temporal-study/src/temporal"
-	"github.com/turao/temporal-study/src/temporal/workflows"
+	createprojectworkflow "github.com/turao/temporal-study/src/temporal/workflow/create-project"
 	temporalclient "go.temporal.io/sdk/client"
 )
 
@@ -40,8 +40,8 @@ func (svc *service) CreateProject(ctx context.Context, req *api.CreateProjectReq
 	execution, err := svc.temporal.ExecuteWorkflow(
 		ctx,
 		options,
-		workflows.CreateProjectWorkflow,
-		workflows.CreateProjectWorkflowRequest{
+		createprojectworkflow.Name,
+		createprojectworkflow.Request{
 			Request: req,
 		},
 	)
@@ -50,7 +50,7 @@ func (svc *service) CreateProject(ctx context.Context, req *api.CreateProjectReq
 		return nil, err
 	}
 
-	var createProjectWorkflowResponse workflows.CreateProjectWorkflowResponse
+	var createProjectWorkflowResponse createprojectworkflow.Response
 	err = execution.Get(ctx, &createProjectWorkflowResponse)
 	if err != nil {
 		log.Println("unable to get create project workflow response", err)
