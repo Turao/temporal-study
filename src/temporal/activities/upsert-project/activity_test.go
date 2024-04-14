@@ -8,7 +8,6 @@ import (
 	mockservice "github.com/turao/temporal-study/mocks/src/service"
 	"github.com/turao/temporal-study/src/api"
 	"github.com/turao/temporal-study/src/service"
-	"go.temporal.io/sdk/testsuite"
 	"go.uber.org/mock/gomock"
 )
 
@@ -59,23 +58,12 @@ func TestExecute(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			suite := testsuite.WorkflowTestSuite{}
-			env := suite.NewTestActivityEnvironment()
-
 			activity := Activity{
 				ProjectService: test.ProjectService(t),
 			}
 
-			env.RegisterActivity(activity.Execute)
-
-			future, err := env.ExecuteActivity(activity.Execute, test.Request)
-			assert.ErrorIs(t, test.ExpectedError, err)
-
-			var res *Response
-			if future != nil {
-				future.Get(&res)
-			}
-
+			res, err := activity.Execute(test.Context, test.Request)
+			assert.Equal(t, test.ExpectedError, err)
 			assert.Equal(t, test.ExpectedResponse, res)
 		})
 	}
