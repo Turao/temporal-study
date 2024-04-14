@@ -6,6 +6,7 @@ import (
 	"github.com/turao/temporal-study/src/temporal/activities"
 	"github.com/turao/temporal-study/src/temporal/workflows"
 
+	createprojectentity "github.com/turao/temporal-study/src/temporal/activities/create-project-entity"
 	notifyprojectowneractivity "github.com/turao/temporal-study/src/temporal/activities/notify-project-owner"
 	upsertprojectactivity "github.com/turao/temporal-study/src/temporal/activities/upsert-project"
 	createprojectworkflow "github.com/turao/temporal-study/src/temporal/workflows/create-project"
@@ -42,6 +43,14 @@ func New(params Params) (*defaultWorker, error) {
 		createProjectWorkflow.Execute,
 		workflow.RegisterOptions{
 			Name: workflows.WorkflowNameCreateProject,
+		},
+	)
+
+	createProjectEntityActivity := &createprojectentity.Activity{}
+	delegate.RegisterActivityWithOptions(
+		createProjectEntityActivity.Execute,
+		activity.RegisterOptions{
+			Name: activities.ActivityNameCreateProjectEntity,
 		},
 	)
 

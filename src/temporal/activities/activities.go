@@ -1,6 +1,7 @@
 package activities
 
 const (
-	ActivityNameNotifyProjectOwner = "notify-project-owner"
-	ActivityNameUpsertProject      = "upsert-project"
+	ActivityNameCreateProjectEntity = "create-project-entity"
+	ActivityNameNotifyProjectOwner  = "notify-project-owner"
+	ActivityNameUpsertProject       = "upsert-project"
 )

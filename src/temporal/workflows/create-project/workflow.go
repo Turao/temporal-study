@@ -4,10 +4,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/gofrs/uuid"
 	"github.com/turao/temporal-study/src/api"
-	projectentity "github.com/turao/temporal-study/src/entity/project"
 	"github.com/turao/temporal-study/src/temporal/activities"
+	createprojectentity "github.com/turao/temporal-study/src/temporal/activities/create-project-entity"
 	notifyprojectowneractivity "github.com/turao/temporal-study/src/temporal/activities/notify-project-owner"
 	upsertprojectactivity "github.com/turao/temporal-study/src/temporal/activities/upsert-project"
 	"go.temporal.io/sdk/temporal"
@@ -39,17 +38,24 @@ func (w *Workflow) Execute(ctx workflow.Context, req Request) (*Response, error)
 
 	// create the entity
 	log.Println("creating the project")
-	ownerID, err := uuid.FromString(req.OwnerID)
-	if err != nil {
-		return nil, err
-	}
-	project, err := projectentity.New(
-		projectentity.WithName(req.ProjectName),
-		projectentity.WithOwnerID(ownerID),
+	var createProjectEntityResponse *createprojectentity.Response
+	err := workflow.ExecuteActivity(
+		ctx,
+		activities.ActivityNameCreateProjectEntity,
+		createprojectentity.Request{
+			ProjectName: req.ProjectName,
+			OwnerID:     req.OwnerID,
+		},
+	).Get(
+		ctx,
+		&createProjectEntityResponse,
 	)
 	if err != nil {
+		log.Println("unable to create project entity", err)
 		return nil, err
 	}
+
+	project := createProjectEntityResponse.Entity
 
 	// store in the repository
 	log.Println("saving the project")
