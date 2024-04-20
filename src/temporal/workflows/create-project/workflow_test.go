@@ -21,7 +21,10 @@ func TestExecute(t *testing.T) {
 		// mocks
 	}{
 		"success": {
-			Request:          Request{},
+			Request: Request{
+				ProjectName: "project-name",
+				OwnerID:     "00000000-0000-0000-0000-000000000001",
+			},
 			ExpectedResponse: &Response{},
 			ExpectedError:    nil,
 		},
