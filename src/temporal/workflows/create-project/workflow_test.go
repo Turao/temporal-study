@@ -52,6 +52,7 @@ func TestExecute(t *testing.T) {
 			// })
 
 			// ! this does not work because OnActivity expects the Activity to be registered (even though the registered function does not get invoked)
+			// ! see https://github.com/temporalio/sdk-go/issues/982
 			env.OnActivity(activities.ActivityNameCreateProjectEntity, gomock.Any()).Return(&createprojectentity.Response{}, nil)
 			env.OnActivity(activities.ActivityNameUpsertProject, gomock.Any()).Return(&upsertproject.Response{}, nil)
 			env.OnActivity(activities.ActivityNameNotifyProjectOwner, gomock.Any()).Return(&notifyprojectowner.Response{}, nil)
