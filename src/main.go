@@ -65,9 +65,9 @@ func main() {
 		}()
 	}
 
-	res, err := projectService.CreateProject(
+	res, err := projectService.StartNewProject(
 		context.Background(),
-		&api.CreateProjectRequest{
+		&api.StartNewProjectRequest{
 			ProjectName: "my-project",
 			OwnerID:     uuid.Must(uuid.NewV4()).String(),
 		},

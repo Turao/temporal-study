@@ -6,10 +6,9 @@ import (
 	"github.com/turao/temporal-study/src/temporal/activities"
 	"github.com/turao/temporal-study/src/temporal/workflows"
 
-	createprojectentity "github.com/turao/temporal-study/src/temporal/activities/create-project-entity"
+	createproject "github.com/turao/temporal-study/src/temporal/activities/create-project"
 	notifyprojectowneractivity "github.com/turao/temporal-study/src/temporal/activities/notify-project-owner"
-	upsertprojectactivity "github.com/turao/temporal-study/src/temporal/activities/upsert-project"
-	createprojectworkflow "github.com/turao/temporal-study/src/temporal/workflows/create-project"
+	startnewprojectworkflow "github.com/turao/temporal-study/src/temporal/workflows/start-new-project"
 
 	"go.temporal.io/sdk/activity"
 	temporalclient "go.temporal.io/sdk/client"
@@ -38,29 +37,21 @@ func New(params Params) (*defaultWorker, error) {
 		worker.Options{},
 	)
 
-	createProjectWorkflow := &createprojectworkflow.Workflow{}
+	startNewProjectWorkflow := &startnewprojectworkflow.Workflow{}
 	delegate.RegisterWorkflowWithOptions(
-		createProjectWorkflow.Execute,
+		startNewProjectWorkflow.Execute,
 		workflow.RegisterOptions{
-			Name: workflows.WorkflowNameCreateProject,
+			Name: workflows.WorkflowNameStartNewProject,
 		},
 	)
 
-	createProjectEntityActivity := &createprojectentity.Activity{}
-	delegate.RegisterActivityWithOptions(
-		createProjectEntityActivity.Execute,
-		activity.RegisterOptions{
-			Name: activities.ActivityNameCreateProjectEntity,
-		},
-	)
-
-	upsertProjectActivity := &upsertprojectactivity.Activity{
+	createProjectActivity := &createproject.Activity{
 		ProjectService: params.ProjectService,
 	}
 	delegate.RegisterActivityWithOptions(
-		upsertProjectActivity.Execute,
+		createProjectActivity.Execute,
 		activity.RegisterOptions{
-			Name: activities.ActivityNameUpsertProject,
+			Name: activities.ActivityNameCreateProject,
 		},
 	)
 

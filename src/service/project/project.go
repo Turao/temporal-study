@@ -12,7 +12,7 @@ import (
 	"github.com/turao/temporal-study/src/temporal/workers"
 
 	"github.com/turao/temporal-study/src/temporal/workflows"
-	createprojectworkflow "github.com/turao/temporal-study/src/temporal/workflows/create-project"
+	startnewprojectworkflow "github.com/turao/temporal-study/src/temporal/workflows/start-new-project"
 	"go.temporal.io/api/enums/v1"
 	temporalclient "go.temporal.io/sdk/client"
 )
@@ -34,35 +34,35 @@ func New(params Params) (*service, error) {
 	}, nil
 }
 
-// CreateProject implements service.ProjectService.
-func (svc *service) CreateProject(ctx context.Context, req *api.CreateProjectRequest) (*api.CreateProjectResponse, error) {
+// StartNewProject implements service.ProjectService.
+func (svc *service) StartNewProject(ctx context.Context, req *api.StartNewProjectRequest) (*api.StartNewProjectResponse, error) {
 	options := temporalclient.StartWorkflowOptions{
-		ID:                    fmt.Sprintf("create-project_%s_%s", req.OwnerID, req.ProjectName),
+		ID:                    fmt.Sprintf("%s_%s_%s", workflows.WorkflowNameStartNewProject, req.OwnerID, req.ProjectName),
 		TaskQueue:             workers.TaskQueueDefault,
 		WorkflowIDReusePolicy: enums.WORKFLOW_ID_REUSE_POLICY_REJECT_DUPLICATE,
 	}
 	execution, err := svc.temporal.ExecuteWorkflow(
 		ctx,
 		options,
-		workflows.WorkflowNameCreateProject,
-		createprojectworkflow.Request{
+		workflows.WorkflowNameStartNewProject,
+		startnewprojectworkflow.Request{
 			ProjectName: req.ProjectName,
 			OwnerID:     req.OwnerID,
 		},
 	)
 	if err != nil {
-		log.Println("unable to start create project workflow", err)
+		log.Println("unable to start workflow", err)
 		return nil, err
 	}
 
-	var createProjectWorkflowResponse createprojectworkflow.Response
-	err = execution.Get(ctx, &createProjectWorkflowResponse)
+	var startNewProjectWorkflowResponse startnewprojectworkflow.Response
+	err = execution.Get(ctx, &startNewProjectWorkflowResponse)
 	if err != nil {
-		log.Println("unable to get create project workflow response", err)
+		log.Println("unable to get workflow response", err)
 		return nil, err
 	}
 
-	return &api.CreateProjectResponse{}, nil
+	return &api.StartNewProjectResponse{}, nil
 }
 
 // DeleteProject implements service.ProjectService.

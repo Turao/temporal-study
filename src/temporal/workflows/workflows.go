@@ -1,5 +1,5 @@
 package workflows
 
 const (
-	WorkflowNameCreateProject = "create-project"
+	WorkflowNameStartNewProject = "start-new-project"
 )

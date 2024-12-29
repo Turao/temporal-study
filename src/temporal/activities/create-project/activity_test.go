@@ -1,9 +1,10 @@
-package upsertproject
+package createproject
 
 import (
 	"context"
 	"testing"
 
+	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
 	mockservice "github.com/turao/temporal-study/mocks/src/service"
 	"github.com/turao/temporal-study/src/api"
@@ -13,24 +14,30 @@ import (
 )
 
 func TestExecute(t *testing.T) {
+	var (
+		mockProjectName = "project-name"
+		mockOwnerID     = uuid.Must(uuid.NewV4())
+	)
+
 	tests := map[string]struct {
-		Context          context.Context
-		Request          Request
-		ExpectedResponse *Response
-		ExpectedError    error
+		Context   context.Context
+		Request   Request
+		Assertion func(t *testing.T, response *Response, err error)
 		// mocks
-		ProjectService func(t *testing.T) service.ProjectService
+		MockProjectService func(t *testing.T) service.ProjectService
 	}{
 		"success": {
 			Context: context.Background(),
 			Request: Request{
-				Request: &api.UpsertProjectRequest{},
+				ProjectName: mockProjectName,
+				OwnerID:     mockOwnerID.String(),
 			},
-			ExpectedResponse: &Response{
-				Response: &api.UpsertProjectResponse{},
+			Assertion: func(t *testing.T, response *Response, err error) {
+				assert.NotNil(t, response)
+				assert.Equal(t, mockProjectName, response.Entity.Name)
+				assert.Equal(t, mockOwnerID, response.Entity.OwnerID)
 			},
-			ExpectedError: nil,
-			ProjectService: func(t *testing.T) service.ProjectService {
+			MockProjectService: func(t *testing.T) service.ProjectService {
 				controller := gomock.NewController(t)
 				mock := mockservice.NewMockProjectService(controller)
 				mock.EXPECT().
@@ -42,11 +49,13 @@ func TestExecute(t *testing.T) {
 		"error - upsert project failure": {
 			Context: context.Background(),
 			Request: Request{
-				Request: &api.UpsertProjectRequest{},
+				ProjectName: mockProjectName,
+				OwnerID:     mockOwnerID.String(),
 			},
-			ExpectedResponse: nil,
-			ExpectedError:    assert.AnError,
-			ProjectService: func(t *testing.T) service.ProjectService {
+			Assertion: func(t *testing.T, response *Response, err error) {
+				assert.ErrorContains(t, err, assert.AnError.Error())
+			},
+			MockProjectService: func(t *testing.T) service.ProjectService {
 				controller := gomock.NewController(t)
 				mock := mockservice.NewMockProjectService(controller)
 				mock.EXPECT().
@@ -63,22 +72,17 @@ func TestExecute(t *testing.T) {
 			env := suite.NewTestActivityEnvironment()
 
 			activity := Activity{
-				ProjectService: test.ProjectService(t),
+				ProjectService: test.MockProjectService(t),
 			}
 			env.RegisterActivity(activity.Execute)
 			val, err := env.ExecuteActivity(activity.Execute, test.Request)
 
-			var res *Response
+			var response *Response
 			if val != nil {
-				val.Get(&res)
+				val.Get(&response)
 			}
 
-			if test.ExpectedError != nil {
-				// todo: this shit does not allow me to assert the TYPE of error that gets thrown
-				assert.ErrorContains(t, err, test.ExpectedError.Error())
-			}
-
-			assert.Equal(t, test.ExpectedResponse, res)
+			test.Assertion(t, response, err)
 		})
 	}
 }

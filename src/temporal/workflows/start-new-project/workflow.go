@@ -1,4 +1,4 @@
-package createproject
+package startnewproject
 
 import (
 	"log"
@@ -6,9 +6,8 @@ import (
 
 	"github.com/turao/temporal-study/src/api"
 	"github.com/turao/temporal-study/src/temporal/activities"
-	createprojectentity "github.com/turao/temporal-study/src/temporal/activities/create-project-entity"
+	createproject "github.com/turao/temporal-study/src/temporal/activities/create-project"
 	notifyprojectowneractivity "github.com/turao/temporal-study/src/temporal/activities/notify-project-owner"
-	upsertprojectactivity "github.com/turao/temporal-study/src/temporal/activities/upsert-project"
 	"go.temporal.io/sdk/temporal"
 	"go.temporal.io/sdk/workflow"
 )
@@ -23,7 +22,7 @@ type Request struct {
 type Response struct{}
 
 func (w *Workflow) Execute(ctx workflow.Context, req Request) (*Response, error) {
-	log.Println("starting create project workflow", req)
+	log.Println("starting workflow", req)
 
 	// apply activity options
 	ctx = workflow.WithActivityOptions(
@@ -36,47 +35,26 @@ func (w *Workflow) Execute(ctx workflow.Context, req Request) (*Response, error)
 		},
 	)
 
-	// create the entity
+	// create the project
 	log.Println("creating the project")
-	var createProjectEntityResponse *createprojectentity.Response
+	var createProjectResponse *createproject.Response
 	err := workflow.ExecuteActivity(
 		ctx,
-		activities.ActivityNameCreateProjectEntity,
-		createprojectentity.Request{
+		activities.ActivityNameCreateProject,
+		createproject.Request{
 			ProjectName: req.ProjectName,
 			OwnerID:     req.OwnerID,
 		},
 	).Get(
 		ctx,
-		&createProjectEntityResponse,
+		&createProjectResponse,
 	)
 	if err != nil {
-		log.Println("unable to create project entity", err)
+		log.Println("unable to create project", err)
 		return nil, err
 	}
 
-	project := createProjectEntityResponse.Entity
-
-	// store in the repository
-	log.Println("saving the project")
-	var upsertProjectActivityResponse *upsertprojectactivity.Response
-	err = workflow.ExecuteActivity(
-		ctx,
-		activities.ActivityNameUpsertProject,
-		upsertprojectactivity.Request{
-			Request: &api.UpsertProjectRequest{
-				ProjectID: project.ID.String(),
-				OwnerID:   project.OwnerID.String(),
-			},
-		},
-	).Get(
-		ctx,
-		&upsertProjectActivityResponse,
-	)
-	if err != nil {
-		log.Println("unable to upsert project", err)
-		return nil, err
-	}
+	project := createProjectResponse.Entity
 
 	// notify the owner
 	log.Println("notifying the project owner")

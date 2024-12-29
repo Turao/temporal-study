@@ -1,4 +1,4 @@
-package createproject
+package startnewproject
 
 import (
 	"testing"
@@ -6,9 +6,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/turao/temporal-study/src/temporal/activities"
-	createprojectentity "github.com/turao/temporal-study/src/temporal/activities/create-project-entity"
+	createproject "github.com/turao/temporal-study/src/temporal/activities/create-project"
 	notifyprojectowner "github.com/turao/temporal-study/src/temporal/activities/notify-project-owner"
-	upsertproject "github.com/turao/temporal-study/src/temporal/activities/upsert-project"
 	"go.temporal.io/sdk/testsuite"
 	"go.uber.org/mock/gomock"
 )
@@ -36,16 +35,12 @@ func TestExecute(t *testing.T) {
 			env := suite.NewTestWorkflowEnvironment()
 
 			// ! this does not work because RegisterActivity expects a function (or struct?)
-			// env.RegisterActivity(activities.ActivityNameCreateProjectEntity)
-			// env.RegisterActivity(activities.ActivityNameUpsertProject)
+			// env.RegisterActivity(activities.ActivityNameCreateProject)
 			// env.RegisterActivity(activities.ActivityNameNotifyProjectOwner)
 
 			// ! this does not work because RegisterActivityWithOptions expects a internal struct (and we cannot use internal packages)
 			// env.RegisterActivityWithOptions(nil, internal.RegisterActivityOptions{
-			// 	Name: activities.ActivityNameCreateProjectEntity,
-			// })
-			// env.RegisterActivityWithOptions(nil, internal.RegisterActivityOptions{
-			// 	Name: activities.ActivityNameUpsertProject,
+			// 	Name: activities.ActivityNameCreateProject,
 			// })
 			// env.RegisterActivityWithOptions(nil, internal.RegisterActivityOptions{
 			// 	Name: activities.ActivityNameNotifyProjectOwner,
@@ -53,8 +48,7 @@ func TestExecute(t *testing.T) {
 
 			// ! this does not work because OnActivity expects the Activity to be registered (even though the registered function does not get invoked)
 			// ! see https://github.com/temporalio/sdk-go/issues/982
-			env.OnActivity(activities.ActivityNameCreateProjectEntity, gomock.Any()).Return(&createprojectentity.Response{}, nil)
-			env.OnActivity(activities.ActivityNameUpsertProject, gomock.Any()).Return(&upsertproject.Response{}, nil)
+			env.OnActivity(activities.ActivityNameCreateProject, gomock.Any()).Return(&createproject.Response{}, nil)
 			env.OnActivity(activities.ActivityNameNotifyProjectOwner, gomock.Any()).Return(&notifyprojectowner.Response{}, nil)
 
 			workflow := Workflow{}

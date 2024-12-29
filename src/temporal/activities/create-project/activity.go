@@ -1,13 +1,17 @@
-package createprojectentity
+package createproject
 
 import (
 	"context"
 
 	"github.com/gofrs/uuid"
+	"github.com/turao/temporal-study/src/api"
 	projectentity "github.com/turao/temporal-study/src/entity/project"
+	"github.com/turao/temporal-study/src/service"
 )
 
-type Activity struct{}
+type Activity struct {
+	ProjectService service.ProjectService
+}
 
 type Request struct {
 	ProjectName string
@@ -18,7 +22,7 @@ type Response struct {
 	Entity *projectentity.Project
 }
 
-func (cpe *Activity) Execute(ctx context.Context, req Request) (*Response, error) {
+func (a *Activity) Execute(ctx context.Context, req Request) (*Response, error) {
 	ownerID, err := uuid.FromString(req.OwnerID)
 	if err != nil {
 		return nil, err
@@ -30,6 +34,16 @@ func (cpe *Activity) Execute(ctx context.Context, req Request) (*Response, error
 	if err != nil {
 		return nil, err
 	}
+
+	_, err = a.ProjectService.UpsertProject(ctx, &api.UpsertProjectRequest{
+		ProjectID:   project.ID.String(),
+		ProjectName: project.Name,
+		OwnerID:     project.OwnerID.String(),
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	return &Response{
 		Entity: project,
 	}, nil

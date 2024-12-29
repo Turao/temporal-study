@@ -7,7 +7,7 @@ import (
 )
 
 type ProjectService interface {
-	CreateProject(ctx context.Context, req *api.CreateProjectRequest) (*api.CreateProjectResponse, error)
+	StartNewProject(ctx context.Context, req *api.StartNewProjectRequest) (*api.StartNewProjectResponse, error)
 	DeleteProject(ctx context.Context, req *api.DeleteProjectRequest) (*api.DeleteProjectResponse, error)
 	UpsertProject(ctx context.Context, req *api.UpsertProjectRequest) (*api.UpsertProjectResponse, error)
 }

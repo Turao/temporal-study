@@ -40,21 +40,6 @@ func (m *MockProjectService) EXPECT() *MockProjectServiceMockRecorder {
 	return m.recorder
 }
 
-// CreateProject mocks base method.
-func (m *MockProjectService) CreateProject(ctx context.Context, req *api.CreateProjectRequest) (*api.CreateProjectResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateProject", ctx, req)
-	ret0, _ := ret[0].(*api.CreateProjectResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// CreateProject indicates an expected call of CreateProject.
-func (mr *MockProjectServiceMockRecorder) CreateProject(ctx, req any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateProject", reflect.TypeOf((*MockProjectService)(nil).CreateProject), ctx, req)
-}
-
 // DeleteProject mocks base method.
 func (m *MockProjectService) DeleteProject(ctx context.Context, req *api.DeleteProjectRequest) (*api.DeleteProjectResponse, error) {
 	m.ctrl.T.Helper()
@@ -68,6 +53,21 @@ func (m *MockProjectService) DeleteProject(ctx context.Context, req *api.DeleteP
 func (mr *MockProjectServiceMockRecorder) DeleteProject(ctx, req any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteProject", reflect.TypeOf((*MockProjectService)(nil).DeleteProject), ctx, req)
+}
+
+// StartNewProject mocks base method.
+func (m *MockProjectService) StartNewProject(ctx context.Context, req *api.StartNewProjectRequest) (*api.StartNewProjectResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "StartNewProject", ctx, req)
+	ret0, _ := ret[0].(*api.StartNewProjectResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// StartNewProject indicates an expected call of StartNewProject.
+func (mr *MockProjectServiceMockRecorder) StartNewProject(ctx, req any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StartNewProject", reflect.TypeOf((*MockProjectService)(nil).StartNewProject), ctx, req)
 }
 
 // UpsertProject mocks base method.
