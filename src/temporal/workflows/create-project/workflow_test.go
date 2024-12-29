@@ -35,7 +35,7 @@ func TestExecute(t *testing.T) {
 			suite := testsuite.WorkflowTestSuite{}
 			env := suite.NewTestWorkflowEnvironment()
 
-			// todo: this shit won't work because the environment does not know how to resolve a string into a workflow mock
+			// todo: this shit won't work because OnActivity expects the Activity to be registered (even though the registered function does not get invoked)
 			env.OnActivity(activities.ActivityNameCreateProjectEntity, gomock.Any()).Return(&createprojectentity.Response{}, nil)
 			env.OnActivity(activities.ActivityNameUpsertProject, gomock.Any()).Return(&upsertproject.Response{}, nil)
 			env.OnActivity(activities.ActivityNameNotifyProjectOwner, gomock.Any()).Return(&notifyprojectowner.Response{}, nil)
