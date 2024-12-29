@@ -35,7 +35,23 @@ func TestExecute(t *testing.T) {
 			suite := testsuite.WorkflowTestSuite{}
 			env := suite.NewTestWorkflowEnvironment()
 
-			// todo: this shit won't work because OnActivity expects the Activity to be registered (even though the registered function does not get invoked)
+			// ! this does not work because RegisterActivity expects a function (or struct?)
+			// env.RegisterActivity(activities.ActivityNameCreateProjectEntity)
+			// env.RegisterActivity(activities.ActivityNameUpsertProject)
+			// env.RegisterActivity(activities.ActivityNameNotifyProjectOwner)
+
+			// ! this does not work because RegisterActivityWithOptions expects a internal struct (and we cannot use internal packages)
+			// env.RegisterActivityWithOptions(nil, internal.RegisterActivityOptions{
+			// 	Name: activities.ActivityNameCreateProjectEntity,
+			// })
+			// env.RegisterActivityWithOptions(nil, internal.RegisterActivityOptions{
+			// 	Name: activities.ActivityNameUpsertProject,
+			// })
+			// env.RegisterActivityWithOptions(nil, internal.RegisterActivityOptions{
+			// 	Name: activities.ActivityNameNotifyProjectOwner,
+			// })
+
+			// ! this does not work because OnActivity expects the Activity to be registered (even though the registered function does not get invoked)
 			env.OnActivity(activities.ActivityNameCreateProjectEntity, gomock.Any()).Return(&createprojectentity.Response{}, nil)
 			env.OnActivity(activities.ActivityNameUpsertProject, gomock.Any()).Return(&upsertproject.Response{}, nil)
 			env.OnActivity(activities.ActivityNameNotifyProjectOwner, gomock.Any()).Return(&notifyprojectowner.Response{}, nil)
